@@ -3,6 +3,7 @@ import cv2
 import mediapipe as mp
 import argparse
 
+
 # Use mediapie model to implement pose detection #
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
