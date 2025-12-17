@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import mediapipe as mp
-import functions
 
 # Use mediapie model to implement pose detection #
 mp_drawing = mp.solutions.drawing_utils
@@ -40,11 +39,9 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                                   )
         
         cv2.imshow('Medapipe Feed', image)
-
         
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
         
     cap.release()
     cv2.destroyAllWindows()
-
