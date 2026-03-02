@@ -25,7 +25,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         
-        # Extract Landmarks
+        # Extract Landmarks: Use try and pass since sometimes it will
+        # not be able to detect the landmark.
         try:
             landmarks = results.pose_landmarks.landmark
             print(landmarks)
@@ -41,10 +42,9 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         
         cv2.imshow('Medapipe Feed', image)
 
-        
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
         
-    cap.release()
-    cv2.destroyAllWindows()
+cap.release()
+cv2.destroyAllWindows()
 
