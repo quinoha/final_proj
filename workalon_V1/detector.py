@@ -23,7 +23,7 @@ class PoseDetector:
     
     def find_pose(self, img, draw=True):
         """
-        Get the frame from the image and draw the landmarks, return
+        Get the frame from the image and draw the landmarks, return image with landmarks
         """
 
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BAYER_BGGR2RGB)
@@ -39,14 +39,28 @@ class PoseDetector:
                 img,
                 self.results.pose_landmarks,
                 self.mp_pose.POSE_CONNECTIONS,
-                self.mp_drawing.DrawingSpec(),
-                self.mp_drawing.DrawingSpec()
+                self.mp_drawing.DrawingSpec(color=(247,117,66), thickness=2, circle_radius=2),
+                self.mp_drawing.DrawingSpec(color=(247,66,230), thickness=2, circle_radius=2)
             )
         
         return img
 
     
     def get_landmarks(self):
-        lm_list = []
-    
+        """
+        Return a dictionary of extracted landmarks
+        ex: lm_dict['left_shoulder'] = [x,y,z]
+        """
+        
+        lm_list = {}
+        if self.results and self.results.pose_landmarks:
+            #
+            for name in self.mp_pose.Pose_landmarks:
+                lm = self.results.pose_landmarks.landmark[name.value]
+
+                key_name = name.name.lower()
+
+                lm_list[key_name] = [lm.x, lm.y, lm.z]
+
+        return lm_list
 

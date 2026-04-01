@@ -8,7 +8,7 @@ import numpy as np
 4. detecting model
 '''
 
-# ============= angles =============
+# ============= angles calculation =============
 def calculate_angle(a, b, c):
     a = np.array(a) # 1st point
     b = np.array(b) # 2st point
@@ -20,5 +20,13 @@ def calculate_angle(a, b, c):
     if(angle > 180.0):
         angle = 360 - angle
     return angle
-    
+
+def calculate_angle_fpga(a, b, c):
+    """
+    Will be used for transceving angle data between Pi and FPGA.
+    """
+
+    return calculate_angle(a, b, c)
+
+
 
