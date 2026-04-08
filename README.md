@@ -7,6 +7,8 @@
 
 **WORKALONE** is a computer vision-based workout assistant designed to track, count, and evaluate exercise routines in real-time. By leveraging Google's MediaPipe Pose detection model, it provides an interactive and structured workout session right on your local machine.
 
+**Referred to the youtube tutorial "https://www.youtube.com/watch?v=06TE_U21FK4&t=642s"**
+
 ---
 
 ## 🎯 Purpose
