@@ -5,7 +5,7 @@ import mediapipe as mp
 class PoseDetector:
     def __init__(self, mode=False, complexity=1, detection_con=0.5, tracking_con=0.5):
         """
-        Initialize Mediapipe model
+        Initialize Mediapipe model.
         """
         
         self.mp_pose = mp.solutions.pose
@@ -23,16 +23,18 @@ class PoseDetector:
     
     def find_pose(self, img, draw=True):
         """
-        Get the frame from the image and draw the landmarks, return image with landmarks
+        Get the frame from the image and draw the landmarks, return image with landmarks.
         """
 
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BAYER_BGGR2RGB)
+        # For raspberry-Pi
+        #img_rgb = cv2.cvtColor(img, cv2.COLOR_BAYER_BGGR2RGB)
+        # For webcam
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        
         img_rgb.flags.writeable = False
-
         self.results = self.pose.process(img_rgb)
-
+        
         img_rgb.flags.writeable = True
-
         # Draw the landmarks if 'draw=True'
         if self.results.pose_landmarks and draw:
             self.mp_drawing.draw_landmarks(
@@ -43,9 +45,9 @@ class PoseDetector:
                 self.mp_drawing.DrawingSpec(color=(247,66,230), thickness=2, circle_radius=2)
             )
         
-        return img
+        lm_dict = self.get_landmarks()
+        return img, lm_dict
 
-    
     def get_landmarks(self):
         """
         Return a dictionary of extracted landmarks
@@ -55,7 +57,7 @@ class PoseDetector:
         lm_list = {}
         if self.results and self.results.pose_landmarks:
             #
-            for name in self.mp_pose.Pose_landmarks:
+            for name in self.mp_pose.PoseLandmark:
                 lm = self.results.pose_landmarks.landmark[name.value]
 
                 key_name = name.name.lower()

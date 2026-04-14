@@ -8,7 +8,6 @@ from functions import calculate_angle
 Uses threshold values to count up arm curls.
 Referred to online tutorial from: https://www.youtube.com/watch?v=06TE_U21FK4&t=642s 
 
-
 '''
 
 # counter variables
