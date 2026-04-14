@@ -104,7 +104,7 @@ class Squat:
 
         squat_accuracy = self.caculate_accuracy(shoulder_balance, left_leg_angle, right_leg_angle)
 
-        return self.cnt, self.stage
+        return self.cnt, self.stage, squat_accuracy
 
     def caculate_accuracy(self, shoulder_balance, left_leg_angle, right_leg_angle):
         accuracy = 100.0
@@ -126,13 +126,28 @@ class Plank:
     def update(self, landmarks, plank_time): 
         plank_time = time.time()
 
-        arm_angle = 
+        arm_angle = utils.calculate_angle(landmarks[''],
+                                          landmarks[''],
+                                          landmarks[''])
+
+        back_angle = utils.calculate_angle(landmarks[''],
+                                           landmarks[''],
+                                           landmarks[''])
 
         #threshold = 
         #if angle < 
 
+
+        plank_accuracy = self.calculate_accuracy()
+
+        return self.elapsed_time, plank_accuracy
+    
+
     def calculate_accuracy(self, arm_angle, back_angle):
+        accuracy = 100.0
+
         
+
 
 '''
 TODO: Pushup routine

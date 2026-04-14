@@ -7,11 +7,12 @@ from config import *
 from detector import PoseDetector
 from exercise import *
 from profiler import PerfettoProfiler
+
 #from llm import 
 #from workalon_V1.llm import WorkoutPlanner
 
 '''
-============== Main Code (Top module) for Workalon ==============
+============== Main Code (Top module) for Workalone ==============
 --> Use Python argparse library to change and add workout routine.
 --> One session can have at most five exercises along with short breaks.
 --> AI gives feedback according to the user age, male/female, Height, Weight.  
@@ -19,6 +20,15 @@ from profiler import PerfettoProfiler
 
 Note that the angle detection using vision models can be distorted according to the depth.
 In other words, 
+
+============== BPM and sensor monitoring ==============
+BPM monitoring via ESP32 and AFib sensor:
+AFib sensor gets heartrate data from wrist, and is sent to Raspberry pi via BLE.
+heartrate is monitore throughout the execute stage, and overall data is assessed afterwards.
+
+============== Personnel Tracking ==============
+
+
 '''
 
 # Gemini API call
