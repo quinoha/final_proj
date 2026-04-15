@@ -83,35 +83,56 @@ class Squat:
         TODO: waist, knee, ankle angle squat logic
         """
 
+        left_hip_vis = landmarks['left_hip'].visibility
+        right_hip_vis = landmarks['right_hip'].visibility
+
+        if left_hip_vis > right_hip_vis:
+            active_hip = landmarks['left_hip']
+            active_knee = landmarks['left_knee']
+            active_ankle = landmarks['left_ankle']
+        else:
+            active_hip = landmarks['right_hip']
+            active_knee = landmarks['right_knee']
+            active_ankle = landmarks['right_ankle']
+
+
+        leg_angle = utils.calculate_angle(active_hip, active_knee, active_ankle)
         shoulder_balance = utils.calculate_angle(landmarks['left_shoulder'],
                                                landmarks['right_shoulder'])
-
-        left_leg_angle = utils.calculate_angle(landmarks['left_hip'],
-                                            landmarks['left_knee'],
-                                            landmarks['left_ankle'])
-
-        right_leg_angle = utils.calculate_angle(landmarks['right_hip'],
-                                            landmarks['right_knee'],
-                                            landmarks['right_ankle'])
-
-        # Squat counter logic
+        
+        # Squat counter logic (Counts up when up --> down, unnatural)
+        '''
         if left_leg_angle > 100 and right_leg_angle > 100:
             self.stage = "up"
         if left_leg_angle < 90 and right_leg_angle < 90 and self.stage == "up":
             self.stage = "down"
             self.cnt +=1 
             print(f"Squat count: {self.cnt} / {self.target_reps}")
+        '''
 
-        squat_accuracy = self.caculate_accuracy(shoulder_balance, left_leg_angle, right_leg_angle)
+        # A better way for counting
+        if leg_angle < 90:
+            if self.stage == "up":
+                self.stage = "down"
+        
+        if leg_angle > 160:
+            if self.stage == "down":
+                self.stage = "up"
+                self.cnt += 1
+                print(f"Squat count: {self.cnt} / {self.target_reps}")
+
+        squat_accuracy = self.caculate_accuracy(shoulder_balance, leg_angle)
 
         return self.cnt, self.stage, squat_accuracy
 
-    def caculate_accuracy(self, shoulder_balance, left_leg_angle, right_leg_angle):
+    def caculate_accuracy(self, shoulder_balance, leg_angle):
         accuracy = 100.0
 
         upper_balance_penalty = abs(0 - shoulder_balance) * 0.5
 
-        waist_balance_penalty = abs()
+        waist_balance_penalty = 0
+
+        return max(0, int(accuracy - upper_balance_penalty - waist_balance_penalty))
 
 
 # Plank class
@@ -126,19 +147,26 @@ class Plank:
     def update(self, landmarks, plank_time): 
         plank_time = time.time()
 
-        arm_angle = utils.calculate_angle(landmarks[''],
-                                          landmarks[''],
-                                          landmarks[''])
+        left_hip_vis = landmarks['left_hip'].visibility
+        right_hip_vis = landmarks['right_hip'].visibility
 
-        back_angle = utils.calculate_angle(landmarks[''],
-                                           landmarks[''],
-                                           landmarks[''])
+        # pick left or right as active side for better tracking
+        if left_hip_vis > right_hip_vis:
+            active_shoulder = landmarks['left_shoulder']
+            active_hip = landmarks['left_hip']
+            active_ankle = landmarks['left_ankle']
+            print("current side: Left")
 
-        #threshold = 
-        #if angle < 
+        else:
+            active_shoulder = landmarks['right_shoulder']
+            active_hip = landmarks['right_hip']
+            active_ankle = landmarks['right_ankle']
+            print("current side: Right")
 
+        active_back_angle = utils.calculate_angle(active_shoulder, active_hip, active_ankle)
+        active_arm_angle = utils.calculate_angle(act)
 
-        plank_accuracy = self.calculate_accuracy()
+        plank_accuracy = self.calculate_accuracy(active_back_angle)
 
         return self.elapsed_time, plank_accuracy
     
@@ -146,7 +174,9 @@ class Plank:
     def calculate_accuracy(self, arm_angle, back_angle):
         accuracy = 100.0
 
-        
+        back_penalty = 0
+
+        return max(0, accuracy - back_penalty) 
 
 
 '''

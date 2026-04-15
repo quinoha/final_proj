@@ -42,24 +42,26 @@ def calculate_angle_fpga(a, b, c):
 
     return calculate_angle(a, b, c)
 
-def draw_status(image, cnt, stage, angle, landmarks):
+def draw_status(image, cnt, stage, accuracy):
     """ 
     Used for drawing status according to current exercise
 
     """
     # Status box
-    cv2.rectangle(image, (0,0), (255,73), (245, 117, 16), -1)
+    cv2.rectangle(image, (0,0), (350,73), (245, 117, 16), -1)
 
     # Rep data
     cv2.putText(image, 'REPS', (15, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
-    cv2.putText(image, str(cnt), (10, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)
+    cv2.putText(image, str(cnt), (10, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1.5, (255,255,255), 2, cv2.LINE_AA)
     
     # Stage data
-    cv2.putText(image, 'STAGE', (65, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
-    cv2.putText(image, str(stage), (60, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)
+    cv2.putText(image, 'STAGE', (100, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
+    cv2.putText(image, str(stage), (95, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1.5, (255,255,255), 2, cv2.LINE_AA)
     
     # Accuracy data
-    cv2.putText(image, 'Accuracy', (), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
+    cv2.putText(image, 'Accuracy', (220, 24), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
+    cv2.putText(image, f'{accuracy:1.2f}', (215, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1.5, (255, 255, 255), 2, cv2.LINE_AA)
 
-    
+    # Angle data
+    #cv2.putText(image, 'Angle', (15, 24), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
 

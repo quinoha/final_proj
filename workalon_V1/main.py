@@ -3,7 +3,7 @@ import cv2
 import argparse
 import time
 import utils
-from config import *
+#from config import *
 from detector import PoseDetector
 from exercise import *
 from profiler import PerfettoProfiler
@@ -40,6 +40,16 @@ parser.add_argument('--routine', type=str, help='routines')
 parser.add_argument('--specs', type=str, help='Male/Female, Height, Weight')
 args = parser.parse_args()
 
+'''
+routine_map = {
+    'curl': Curl(target_reps=20),
+    'squat': Squat(target_reps=15),
+    'plank': Plank(target_time=60)
+}
+
+routine_names = [name.]
+'''
+
 detector = PoseDetector()
 current_exercise = Curl()
 
@@ -62,10 +72,8 @@ while cap.isOpened():
         continue
 
     t1 = time.perf_counter_ns()
-
     # Model analyze landmark dictionary
     image, landmarks = detector.find_pose(frame)
-
     t2 = time.perf_counter_ns()
     profiler.add_event("Mediapipe_Inference", "AI", t1/1000, (t2-t1)/1000)
 
@@ -75,9 +83,8 @@ while cap.isOpened():
 
         # begin calculating time used in angle extraction
         start_time = time.perf_counter()
-
-        count, stage = current_exercise.update(landmarks)
-
+        count, stage, accuracy = current_exercise.update(landmarks)
+        
         t4 = time.perf_counter_ns()
         profiler.add_event("Calculate_Angle_CPU", "Logic", t3/1000, (t4-t3)/1000)
 
@@ -86,7 +93,7 @@ while cap.isOpened():
         print(f"CPU calculation time: {latency_us:.2f} us")
     
         # plot landmarks, reps, accuracy
-        utils.draw_status(image, count, stage, accuracy, landmarks['left_elbow'])
+        utils.draw_status(image, count, stage, accuracy)
     
     cv2.imshow('Workout Advisor', image)
     frame_count += 1
