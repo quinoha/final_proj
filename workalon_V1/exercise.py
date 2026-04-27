@@ -188,8 +188,7 @@ class Pushup:
         self.target_reps = target_reps
 
     def update(self, landmarks):
-        x = 0
-
+        
         left_visibility = landmarks['left_hip'].visibility
         right_visibility = landmarks['right_hip'].visibiliy
 
@@ -198,9 +197,9 @@ class Pushup:
                                                      landmarks['left_elbow'],
                                                      landmarks['left_wrist'])
             
-            active_back_angle = utils.calculate_angle(landmarks['right'],
-                                                      landmarks[''],
-                                                      landmarks[''])
+            active_back_angle = utils.calculate_angle(landmarks['left_shoulder'],
+                                                      landmarks['left_hip'],
+                                                      landmarks['left_ankle'])
             
             print("Current side: left")
         else:
@@ -208,16 +207,23 @@ class Pushup:
                                                      landmarks['right_elbow'],
                                                      landmarks['right_wrist'])
             
-            active_back_angle = utils.calculate_angle(landmarks[''],
-                                                      landmarks[''],
-                                                      landmarks[''])
+            active_back_angle = utils.calculate_angle(landmarks['right_shoulder'],
+                                                      landmarks['right_hip'],
+                                                      landmarks['right_ankle'])
 
             print("Current side: right")
             
         
-        accuracy = 
+        # Calculate reps
 
-        return 
+        accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
+
+        return accuracy
 
     def calculate_accuracy(arm_angle, back_angle):
+        accuracy = 100.0
 
+        back_penalty = abs(0 - back_angle) * 0.5
+        arm_penalty = abs(0 - arm_angle) * 0.5
+
+        return max(0, accuracy - back_penalty - arm_penalty)

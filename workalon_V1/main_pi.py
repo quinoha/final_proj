@@ -42,7 +42,6 @@ parser.add_argument('--specs', type=str, help='Male/Female, Height, Weight')
 args = parser.parse_args()
 
 
-
 detector = PoseDetector()
 current_exercise = Curl()
 
