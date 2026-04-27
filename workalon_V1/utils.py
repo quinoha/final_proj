@@ -35,6 +35,8 @@ def calculate_balance(a, b):
 
     return angle
 
+
+
 def calculate_angle_fpga(a, b, c):
     """
     Will be used for transceving angle data between Pi and FPGA.

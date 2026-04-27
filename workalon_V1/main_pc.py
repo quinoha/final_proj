@@ -7,7 +7,7 @@ import utils
 from detector import PoseDetector
 from exercise import *
 from profiler import PerfettoProfiler
-from picamera2 import Picamera2
+
 
 #from llm import 
 #from workalon_V1.llm import WorkoutPlanner

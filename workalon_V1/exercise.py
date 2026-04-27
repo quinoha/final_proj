@@ -97,7 +97,7 @@ class Squat:
 
 
         leg_angle = utils.calculate_angle(active_hip, active_knee, active_ankle)
-        shoulder_balance = utils.calculate_angle(landmarks['left_shoulder'],
+        shoulder_balance = utils.calculate_balance(landmarks['left_shoulder'],
                                                landmarks['right_shoulder'])
         
         # Squat counter logic (Counts up when up --> down, unnatural)
@@ -174,21 +174,50 @@ class Plank:
     def calculate_accuracy(self, arm_angle, back_angle):
         accuracy = 100.0
 
-        back_penalty = 0
+        back_penalty = abs(0 - back_angle) * 0.5
 
         return max(0, accuracy - back_penalty) 
 
 
-'''
-TODO: Pushup routine
+#TODO: Pushup routine
 # Extension from plank
-clas Pushup:
+class Pushup:
     def __init__(self, target_reps=20, user_specs=None):
         self.cnt = 0
         self.stage = None
         self.target_reps = target_reps
 
-    def Pushups(angle, counter):
+    def update(self, landmarks):
         x = 0
-'''
+
+        left_visibility = landmarks['left_hip'].visibility
+        right_visibility = landmarks['right_hip'].visibiliy
+
+        if left_visibility > right_visibility:
+            active_arm_angle = utils.calculate_angle(landmarks['left_shoulder'],
+                                                     landmarks['left_elbow'],
+                                                     landmarks['left_wrist'])
+            
+            active_back_angle = utils.calculate_angle(landmarks['right'],
+                                                      landmarks[''],
+                                                      landmarks[''])
+            
+            print("Current side: left")
+        else:
+            active_arm_angle = utils.calculate_angle(landmarks['right_shoulder'],
+                                                     landmarks['right_elbow'],
+                                                     landmarks['right_wrist'])
+            
+            active_back_angle = utils.calculate_angle(landmarks[''],
+                                                      landmarks[''],
+                                                      landmarks[''])
+
+            print("Current side: right")
+            
+        
+        accuracy = 
+
+        return 
+
+    def calculate_accuracy(arm_angle, back_angle):
 
