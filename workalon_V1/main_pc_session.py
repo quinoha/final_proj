@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import json
 import cv2
 import argparse
 import time
@@ -43,7 +45,14 @@ parser.add_argument('--routine', type=str, help='routines')
 parser.add_argument('--specs', type=str, help='Male/Female, Height, Weight')
 args = parser.parse_args()
 
-# 
+
+"""
+function for getting user inputs as json file.
+1. if input_specs ==> user inputs --specs male,185,80.
+2. Load existing profile.
+3. No input, no exisiting profile ==> set to default profile.
+"""
+
 PROFILE_FILE = "user_profile.json"
 def get_user_specs(input_specs):
     if input_specs:
@@ -68,9 +77,10 @@ def get_user_specs(input_specs):
         return profile_data
     
     print("No user profile nor input: using Default profile")
-    return {"gender": "Unknown", "height": 170.0, "weight": 80.0}
+    return {"gender": "Unknown", "height": 185.0, "weight": 80.0}
 
-parsed_spec = get_user_specs(args.specs)
+parsed_specs = get_user_specs(args.specs)
+
 
 # Routine class map
 routine_map = {
@@ -80,16 +90,31 @@ routine_map = {
     "pushup": Pushup
 }
 
-routine_name = args.routine.lower() if args.routine else "curl"
-exercise_class = routine_map.get(routine_name, Curl)
+routine_names = args.routine.lower() if args.routine else "curl"
+session_queue = []
 
-if routine_name not in routine_map:
-    print("Unknown routine: rollback to curl.")
+for name in routine_names:
+    if name in routine_map:
+        session_queue.append(routine_map[name](user_specs=parsed_specs))
+    else:
+        print(f"Unknwon routine skipped.")
 
-current_exercise = exercise_class(user_specs = get_user_specs)
+if not session_queue:
+    print("No executable routines. Default to curl")
+    session_queue.append(Curl(user_specs=parsed_specs))
 
+# Current index
+curr_idx = 0
+curr_exercise = session_queue[curr_idx]
+
+# Manage break time between sessions
+is_resting = False
+rest_time = 0
+break_duration = 20
+
+
+# Initialize MediaPipe model detector
 detector = PoseDetector()
-
 # Video Capture
 cap = cv2.VideoCapture(1)
 
@@ -99,7 +124,9 @@ frame_count = 0
 Max_Frames = 100
 print("Starting profiling")
 
-# Main Loop
+"""
+==================== Main Loop ==================== 
+"""
 while cap.isOpened():
     # Get image frame
     ret, frame = cap.read()
@@ -114,8 +141,29 @@ while cap.isOpened():
     t2 = time.perf_counter_ns()
     profiler.add_event("Mediapipe_Inference", "AI", t1/1000, (t2-t1)/1000)
 
-    # begin workout routine
+    # begin workout routine: check is_resting state.
     if landmarks:
+        if is_resting:
+            elapsed_rest = time.time() - rest_time
+            if elapsed_rest >= break_duration:
+                # Break over: move on to next routine
+                is_resting = False
+                curr_idx += 1
+                if curr_idx < len(session_queue):
+                    curr_exercise = session_queue[curr_idx]
+                    print(f"Starting Next routine: {type(curr_exercise).__name__}")
+                else:
+                    # session over
+                    print("Session ended. Great work!")
+                    break
+            else:
+                # Breaktime: skip angle calculation
+                cv2.putText(image, f"Rest: {int(break_duration-elapsed_rest)}s", 
+                            (200, 240), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 255), 4)
+                cv2.imshow('Workout Advisor', image)
+                continue
+                
+
         t3 = time.perf_counter_ns()
 
         # begin calculating time used in angle extraction
@@ -132,6 +180,7 @@ while cap.isOpened():
         # plot landmarks, reps, accuracy
         utils.draw_status(image, count, stage, accuracy)
     
+
     cv2.imshow('Workout Advisor', image)
     frame_count += 1
     
