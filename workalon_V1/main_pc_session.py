@@ -5,11 +5,11 @@ import cv2
 import argparse
 import time
 import utils
+
 #from config import *
 from detector import PoseDetector
 from exercise import *
 from profiler import PerfettoProfiler
-
 
 #from llm import 
 #from workalon_V1.llm import WorkoutPlanner
@@ -30,8 +30,6 @@ AFib sensor gets heartrate data from wrist, and is sent to Raspberry pi via BLE.
 heartrate is monitore throughout the execute stage, and overall data is assessed afterwards.
 
 ============== Personnel Tracking ==============
-
-
 '''
 
 # Gemini API call
@@ -90,7 +88,13 @@ routine_map = {
     "pushup": Pushup
 }
 
-routine_names = args.routine.lower() if args.routine else "curl"
+#routine_names = args.routine.lower() if args.routine else "curl"
+
+if args.routine:
+    routine_names = [name.strip().lower() for name in args.routine.split(',')]
+else:
+    routine_names = ["curl"]
+
 session_queue = []
 
 for name in routine_names:
@@ -102,6 +106,7 @@ for name in routine_names:
 if not session_queue:
     print("No executable routines. Default to curl")
     session_queue.append(Curl(user_specs=parsed_specs))
+
 
 # Current index
 curr_idx = 0
@@ -168,7 +173,7 @@ while cap.isOpened():
 
         # begin calculating time used in angle extraction
         start_time = time.perf_counter()
-        count, stage, accuracy = current_exercise.update(landmarks)
+        count, stage, accuracy = curr_exercise.update(landmarks)
         
         t4 = time.perf_counter_ns()
         profiler.add_event("Calculate_Angle_CPU", "Logic", t3/1000, (t4-t3)/1000)
@@ -176,9 +181,9 @@ while cap.isOpened():
         end_time = time.perf_counter()
         latency_us = (end_time - start_time) * 1000000
         print(f"CPU calculation time: {latency_us:.2f} us")
-    
+
         # plot landmarks, reps, accuracy
-        utils.draw_status(image, count, stage, accuracy)
+        utils.draw_status(image, count, stage, accuracy, curr_exercise)
     
 
     cv2.imshow('Workout Advisor', image)

@@ -36,7 +36,6 @@ def calculate_balance(a, b):
     return angle
 
 
-
 def calculate_angle_fpga(a, b, c):
     """
     Will be used for transceving angle data between Pi and FPGA.
@@ -44,13 +43,18 @@ def calculate_angle_fpga(a, b, c):
 
     return calculate_angle(a, b, c)
 
-def draw_status(image, cnt, stage, accuracy):
+
+def draw_status(image, cnt, stage, accuracy, curr_ex):
     """ 
     Used for drawing status according to current exercise
 
     """
     # Status box
     cv2.rectangle(image, (0,0), (350,73), (245, 117, 16), -1)
+
+    # Current workout action
+    cv2.putText(image, 'Session: ', (30, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
+    cv2.putText(image, str(curr_ex), (25, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1.5, (255, 255, 255), 2, cv2.LINE_AA)
 
     # Rep data
     cv2.putText(image, 'REPS', (15, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
@@ -67,3 +71,4 @@ def draw_status(image, cnt, stage, accuracy):
     # Angle data
     #cv2.putText(image, 'Angle', (15, 24), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
 
+    

@@ -3,6 +3,7 @@ import cv2
 import argparse
 import time
 import utils
+
 #from config import *
 from detector import PoseDetector
 from exercise import *
