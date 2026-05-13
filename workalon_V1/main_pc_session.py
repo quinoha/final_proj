@@ -107,9 +107,9 @@ if not session_queue:
     print("No executable routines. Default to curl")
     session_queue.append(Curl(user_specs=parsed_specs))
 
-
 # Current index
 curr_idx = 0
+
 curr_exercise = session_queue[curr_idx]
 
 # Manage break time between sessions
@@ -121,7 +121,7 @@ break_duration = 20
 # Initialize MediaPipe model detector
 detector = PoseDetector()
 # Video Capture
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Instantiate Profiler object
 profiler = PerfettoProfiler("cpu_baseline.json")
@@ -173,7 +173,7 @@ while cap.isOpened():
 
         # begin calculating time used in angle extraction
         start_time = time.perf_counter()
-        count, stage, accuracy = curr_exercise.update(landmarks)
+        count, stage, accuracy, is_done = curr_exercise.update(landmarks)
         
         t4 = time.perf_counter_ns()
         profiler.add_event("Calculate_Angle_CPU", "Logic", t3/1000, (t4-t3)/1000)
