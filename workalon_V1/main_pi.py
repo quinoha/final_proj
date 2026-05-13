@@ -1,8 +1,10 @@
+import os
 import numpy as np
 import cv2
 import argparse
 import time
 import utils
+import json
 #from config import *
 from detector import PoseDetector
 from exercise import *
@@ -27,6 +29,10 @@ BPM monitoring via ESP32 and AFib sensor:
 AFib sensor gets heartrate data from wrist, and is sent to Raspberry pi via BLE.
 heartrate is monitore throughout the execute stage, and overall data is assessed afterwards.
 
+--> BYTE sending
+
+
+
 ============== Personnel Tracking ==============
 
 
@@ -35,18 +41,65 @@ heartrate is monitore throughout the execute stage, and overall data is assessed
 # Gemini API call
 
 
+
 # Argparse for setting routines
 parser = argparse.ArgumentParser(description="WARKALON-V1: add your workout routine")
 parser.add_argument('--routine', type=str, help='routines')
 parser.add_argument('--specs', type=str, help='Male/Female, Height, Weight')
 args = parser.parse_args()
 
+PROFILE_FILE = "user_profile.json"
 
+def get_user_specs(input_specs):
+    # 1. Get input specs when user types --specs for the first time
+    if input_specs:
+        specs_list = []
+        profile_data = {
+            "gender": specs_list[0],
+            "height": float(specs_list[1]),
+            "weight": float(specs_list[2])
+        }
+    
+        with open(PROFILE_FILE, 'w') as f:
+            json.dump(profile_data, f, indent=4)
+        print(f"User profile made: {profile_data}")
+        return profile_data
+    
+    # 2. Load specs from existing json file
+    if os.path.exists(PROFILE_FILE):
+        with open(PROFILE_FILE, 'r') as f:
+            profile_data = json.load(f)
+        print(f"Loading existing user data: {profile_data}")
+        return profile_data
+    
+    # 3. No input, no saved json
+    
+    pass
+
+parsed_specs = None
+#
+if args.specs:
+    parsed_specs = [spec.strip]
+
+
+# Routine dictionary
+routine_map = {
+    "curl": Curl,
+    "squat": Squat,
+    "plank": Plank,
+    "push": Pushup
+}
+
+# if there are no routines, default is set as curl
+routine_name = args.routine.lower() if args.routine else "curl"
+exercise_class = routine_map.get(routine_name, Curl)
+
+current_exercise = exercise_class(user_specs = parsed_specs)
 detector = PoseDetector()
-current_exercise = Curl()
 
-# Video Capture
+# cv2.VideoCapture does not work anymore
 #cap = cv2.VideoCapture(1)
+# Video Capture
 picam2 = Picamera2()
 
 config = picam2.create_preview_configuration(main={"size": (640,480), "format": "BGR888"})
@@ -80,7 +133,10 @@ while True:
         print("Waiting for camera frame...")
         continue
     '''
-
+    
+    # Switch color from rgb to bgr (prevent smurf skin)
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    
     t1 = time.perf_counter_ns()
     # Model analyze landmark dictionary
     image, landmarks = detector.find_pose(frame)

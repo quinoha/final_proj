@@ -171,10 +171,10 @@ class Plank:
         return self.elapsed_time, plank_accuracy
     
 
-    def calculate_accuracy(self, arm_angle, back_angle):
+    def calculate_accuracy(self, active_back_angle, active_arm_angle):
         accuracy = 100.0
 
-        back_penalty = abs(0 - back_angle) * 0.5
+        back_penalty = abs(0 - active_back_angle) * 0.5
 
         return max(0, accuracy - back_penalty) 
 
@@ -220,10 +220,10 @@ class Pushup:
 
         return accuracy
 
-    def calculate_accuracy(arm_angle, back_angle):
+    def calculate_accuracy(active_arm_angle, active_back_angle):
         accuracy = 100.0
 
-        back_penalty = abs(0 - back_angle) * 0.5
-        arm_penalty = abs(0 - arm_angle) * 0.5
+        back_penalty = abs(0 - active_back_angle) * 0.5
+        arm_penalty = abs(0 - active_arm_angle) * 0.5
 
         return max(0, accuracy - back_penalty - arm_penalty)
