@@ -2,16 +2,11 @@ import numpy as np
 import csv
 import asyncio
 
-from bleak import BleakScanner, BleakClient
+from bleak import BleakClient
 
 FILE_NAME = "workout_bpm.csv"
+CHAR_UUID = ""
 
-async def run():
-    devices = await BleakScanner.discover()
-    for d in devices:
-        print(f"Name: {d.name}, address: {d.adreess}")
-
-asyncio.run(run())
 
 def notification_handler(sender, data):
     
@@ -21,6 +16,10 @@ def notification_handler(sender, data):
     pass
 
 async def main(address):
+    # CSV file header
+    
+    
+    # start BLE client mode and monitor
     async with BleakClient(address) as client:
         print(f"Connected to BLE address: {address}")
         
