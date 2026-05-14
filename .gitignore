@@ -1,5 +1,9 @@
+
 # API Key
 .env
+
+# User Profile
+user_profile.json
 
 # Python Garbage
 __pycache__/
