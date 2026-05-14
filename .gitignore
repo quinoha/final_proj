@@ -1,0 +1,13 @@
+# API Key
+.env
+
+# Python Garbage
+__pycache__/
+*.[cod]
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+
+# VScode settings
+.vscode/
