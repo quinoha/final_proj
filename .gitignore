@@ -5,6 +5,9 @@
 # User Profile
 user_profile.json
 
+# test files
+json_test.py
+
 # Python Garbage
 __pycache__/
 *.[cod]
