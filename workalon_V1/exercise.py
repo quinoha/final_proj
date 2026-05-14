@@ -181,11 +181,10 @@ class Plank:
         return self.elapsed_time, self.stage, plank_accuracy, is_done
     
 
-    def calculate_accuracy(self, arm_angle, back_angle):
+    def calculate_accuracy(self, active_back_angle, active_arm_angle):
         accuracy = 100.0
 
-        back_penalty = abs(0 - back_angle) * 0.5
-        arm_penalty = abs(0 - arm_angle) * 0.5
+        back_penalty = abs(0 - active_back_angle) * 0.5
 
         return max(0, accuracy - back_penalty) 
 
@@ -219,22 +218,15 @@ class Pushup:
         accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
         
         # Calculate reps
-        if active_arm_angle > 90:
-            self.stage = "down"
-        elif active_arm_angle > 160 and self.stage == "down":
-            self.stage = "up"
-            self.cnt += 1
-            print(f"Pushup {self.cnt}/{self.target_reps}")
 
-        is_done = self.cnt >= self.target_reps
+        accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
 
-        return self.cnt, accuracy, self.stage, is_done
+        return accuracy
 
-
-    def calculate_accuracy(arm_angle, back_angle):
+    def calculate_accuracy(active_arm_angle, active_back_angle):
         accuracy = 100.0
 
-        back_penalty = abs(0 - back_angle) * 0.5
-        arm_penalty = abs(0 - arm_angle) * 0.5
+        back_penalty = abs(0 - active_back_angle) * 0.5
+        arm_penalty = abs(0 - active_arm_angle) * 0.5
 
         return max(0, accuracy - back_penalty - arm_penalty)
