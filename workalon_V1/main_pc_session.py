@@ -6,13 +6,11 @@ import argparse
 import time
 import utils
 
-#from config import *
+
 from detector import PoseDetector
 from exercise import *
 from profiler import PerfettoProfiler
-
-#from llm import 
-#from workalon_V1.llm import WorkoutPlanner
+from llm import WorkoutPlanner
 
 '''
 ============== Main Code (Top module) for Workalone ==============
@@ -33,9 +31,7 @@ heartrate is monitore throughout the execute stage, and overall data is assessed
 '''
 
 # Gemini API call
-
-
-
+planner = WorkoutPlanner()
 
 # Argparse for setting routines
 parser = argparse.ArgumentParser(description="WARKALON-V1: add your workout routine")

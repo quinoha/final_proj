@@ -171,7 +171,7 @@ class Plank:
 
 
         # detect currect plank
-        if active_back_angle > 
+        #if active_back_angle > 
 
         self.elapsed_time += plank_time
 

@@ -10,8 +10,8 @@ from exercise import *
 from profiler import PerfettoProfiler
 from picamera2 import Picamera2
 
-#from llm import 
-#from workalon_V1.llm import WorkoutPlanner
+from llm import WorkoutPlanner
+
 
 '''
 ============== Main Code (Top module) for Workalone ==============
