@@ -87,16 +87,16 @@ class Squat:
         right_hip_vis = landmarks['right_hip'][2]
 
         if left_hip_vis > right_hip_vis:
-            active_hip = landmarks['left_hip']
-            active_knee = landmarks['left_knee']
-            active_ankle = landmarks['left_ankle']
+            side = 'left'
         else:
-            active_hip = landmarks['right_hip']
-            active_knee = landmarks['right_knee']
-            active_ankle = landmarks['right_ankle']
+            side = 'right'
 
+        active_hip = landmarks[f'{side}_hip']
+        active_knee = landmarks[f'{side}_knee']
+        active_ankle = landmarks[f'{side}_ankle']
 
         leg_angle = utils.calculate_angle(active_hip, active_knee, active_ankle)
+        
         shoulder_balance = utils.calculate_balance(landmarks['left_shoulder'],
                                                landmarks['right_shoulder'])
         
@@ -139,9 +139,10 @@ class Squat:
 class Plank:
     def __init__(self, target_time=60, user_specs=None):
         self.start_time = None    
-        self.is_planking = False
+        self.stage = False
         self.target_time = target_time
         self.elapsed_time = 0
+        self.remaining_time = self.target_time - self.elapsed_time
     
     # Everything neutral: body angle used
     def update(self, landmarks, plank_time): 
@@ -152,29 +153,39 @@ class Plank:
 
         # pick left or right as active side for better tracking
         if left_hip_vis > right_hip_vis:
-            active_shoulder = landmarks['left_shoulder']
-            active_hip = landmarks['left_hip']
-            active_ankle = landmarks['left_ankle']
-            print("current side: Left")
-
+            side = 'left'
         else:
-            active_shoulder = landmarks['right_shoulder']
-            active_hip = landmarks['right_hip']
-            active_ankle = landmarks['right_ankle']
-            print("current side: Right")
+            side = 'right'
+
+        active_shoulder = landmarks[f'left_shoulder']
+        active_hip = landmarks[f'{side}_hip']
+        active_ankle = landmarks[f'{side}_ankle']
+        active_elbow = landmarks[f'{side}_elbow']
+        active_wrist = landmarks[f'{side}_wrist']
+        print(f"current side: {side}")
 
         active_back_angle = utils.calculate_angle(active_shoulder, active_hip, active_ankle)
-        active_arm_angle = utils.calculate_angle(active_shoulder, )
+        active_arm_angle = utils.calculate_angle(active_shoulder, active_elbow, active_wrist)
 
         plank_accuracy = self.calculate_accuracy(active_back_angle)
 
-        return self.elapsed_time, plank_accuracy
+
+        # detect currect plank
+        if active_back_angle > 
+
+        self.elapsed_time += plank_time
+
+        is_done = self.elapsed_time >= self.target_time
+        
+
+        return self.elapsed_time, self.stage, plank_accuracy, is_done
     
 
     def calculate_accuracy(self, arm_angle, back_angle):
         accuracy = 100.0
 
         back_penalty = abs(0 - back_angle) * 0.5
+        arm_penalty = abs(0 - arm_angle) * 0.5
 
         return max(0, accuracy - back_penalty) 
 
@@ -184,7 +195,7 @@ class Plank:
 class Pushup:
     def __init__(self, target_reps=20, user_specs=None):
         self.cnt = 0
-        self.stage = None
+        self.stage = "up"
         self.target_reps = target_reps
 
     def update(self, landmarks):
@@ -193,34 +204,32 @@ class Pushup:
         right_visibility = landmarks['right_hip'][2]
 
         if left_visibility > right_visibility:
-            active_arm_angle = utils.calculate_angle(landmarks['left_shoulder'],
-                                                     landmarks['left_elbow'],
-                                                     landmarks['left_wrist'])
-            
-            active_back_angle = utils.calculate_angle(landmarks['left_shoulder'],
-                                                      landmarks['left_hip'],
-                                                      landmarks['left_ankle'])
-            
-            print("Current side: left")
+            side = 'left'
         else:
-            active_arm_angle = utils.calculate_angle(landmarks['right_shoulder'],
-                                                     landmarks['right_elbow'],
-                                                     landmarks['right_wrist'])
+            side = 'right'
+        
+        active_arm_angle = utils.calculate_angle(landmarks[f'{side}_shoulder'],
+                                                 landmarks[f'{side}_elbow'],
+                                                 landmarks[f'{side}_wrist'])
             
-            active_back_angle = utils.calculate_angle(landmarks['right_shoulder'],
-                                                      landmarks['right_hip'],
-                                                      landmarks['right_ankle'])
-
-            print("Current side: right")
+        active_back_angle = utils.calculate_angle(landmarks[f'{side}_shoulder'],
+                                                  landmarks[f'{side}_hip'],
+                                                  landmarks[f'{side}_ankle'])
             
+        accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
         
         # Calculate reps
+        if active_arm_angle > 90:
+            self.stage = "down"
+        elif active_arm_angle > 160 and self.stage == "down":
+            self.stage = "up"
+            self.cnt += 1
+            print(f"Pushup {self.cnt}/{self.target_reps}")
 
-        accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
+        is_done = self.cnt >= self.target_reps
 
+        return self.cnt, accuracy, self.stage, is_done
 
-
-        return accuracy
 
     def calculate_accuracy(arm_angle, back_angle):
         accuracy = 100.0
