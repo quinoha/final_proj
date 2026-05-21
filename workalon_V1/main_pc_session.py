@@ -28,6 +28,14 @@ AFib sensor gets heartrate data from wrist, and is sent to Raspberry pi via BLE.
 heartrate is monitore throughout the execute stage, and overall data is assessed afterwards.
 
 ============== Personnel Tracking ==============
+
+
+How-to:
+# 첫 실행 (프로필 저장 + AI 루틴 생성)
+python main_pc_session.py --routine auto --specs "Male, 180, 80"
+
+# 두 번째 실행부터 (저장된 프로필 기반으로 매번 다른 루틴 생성)
+python main_pc_session.py --routine auto
 '''
 
 # Gemini API call
