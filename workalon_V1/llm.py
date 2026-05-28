@@ -41,7 +41,8 @@ class WorkoutPlanner:
         {', '.join(available_exercises)}
 
         [Output rules - Strict]
-        ONLY use words in
+        Recommend a workout routine following the given [user specs] and [available routines].
+        ONLY use words in the response.
         No need for any other explanation, ONLY lower-case english strings should be output.
         ex: curl, squat, pushup
 

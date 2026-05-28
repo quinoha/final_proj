@@ -27,9 +27,9 @@ class PoseDetector:
         """
 
         # For raspberry-Pi
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BAYER_BGGR2RGB)
+        #img_rgb = cv2.cvtColor(img, cv2.COLOR_BAYER_BGGR2RGB)
         # For webcam
-        #img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         
         img_rgb.flags.writeable = False
         self.results = self.pose.process(img_rgb)

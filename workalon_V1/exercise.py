@@ -50,7 +50,9 @@ class Curl:
 
         curl_accuracy = self.calculate_accuracy(arm_angle, back_angle)
 
-        return self.cnt, self.stage, curl_accuracy
+        is_done = (self.cnt >= self.target_reps)
+
+        return self.cnt, self.stage, curl_accuracy, is_done
  
     def calculate_accuracy(self, arm_angle, back_angle):
         accuracy = 100.0
@@ -125,7 +127,7 @@ class Squat:
 
         return self.cnt, self.stage, squat_accuracy, is_done
 
-    def caculate_accuracy(self, shoulder_balance, leg_angle):
+    def calculate_accuracy(self, shoulder_balance, leg_angle):
         accuracy = 100.0
 
         upper_balance_penalty = abs(0 - shoulder_balance) * 0.5
@@ -145,7 +147,7 @@ class Plank:
         self.remaining_time = self.target_time - self.elapsed_time
     
     # Everything neutral: body angle used
-    def update(self, landmarks, plank_time): 
+    def update(self, landmarks): 
         plank_time = time.time()
 
         left_hip_vis = landmarks['left_hip'][2]
@@ -196,6 +198,7 @@ class Pushup:
         self.cnt = 0
         self.stage = "up"
         self.target_reps = target_reps
+        self.user_specs = user_specs
 
     def update(self, landmarks):
         
@@ -220,10 +223,11 @@ class Pushup:
         # Calculate reps
 
         accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
+        is_done = (self.cnt >= self.target_reps)
 
-        return accuracy
+        return self.cnt, self.stage, accuracy, is_done
 
-    def calculate_accuracy(active_arm_angle, active_back_angle):
+    def calculate_accuracy(self, active_arm_angle, active_back_angle):
         accuracy = 100.0
 
         back_penalty = abs(0 - active_back_angle) * 0.5

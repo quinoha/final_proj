@@ -32,10 +32,13 @@ heartrate is monitore throughout the execute stage, and overall data is assessed
 
 How-to:
 # 첫 실행 (프로필 저장 + AI 루틴 생성)
+python main_pc_session.py --routine auto --specs "Gender, Height, weight"
 python main_pc_session.py --routine auto --specs "Male, 180, 80"
 
 # 두 번째 실행부터 (저장된 프로필 기반으로 매번 다른 루틴 생성)
 python main_pc_session.py --routine auto
+
+
 '''
 
 # Gemini API call
@@ -57,6 +60,8 @@ function for getting user inputs as json file.
 
 PROFILE_FILE = "user_profile.json"
 def get_user_specs(input_specs):
+    default_profile = {"gender": "Unknown", "height": 185.0, "weight": 80.0}
+
     if input_specs:
         specs_list = [spec.strip() for spec in input_specs.split(',')]
         profile_data = {
@@ -64,12 +69,29 @@ def get_user_specs(input_specs):
             "height": float(specs_list[1]),
             "weight": float(specs_list[2]),
         }
+        try:
+            specs_list = [spec.strip() for spec in input_specs.split(',')]
+            if len(specs_list) != 3:
+                raise ValueError("Needs exactly 3 arguments (e.g. 'Male, 180, 80')")
 
         # Save as josn file
         with open(PROFILE_FILE, 'w') as f:
             json.dump(profile_data, f, indent=4)
         print(f"New user profile generated: {profile_data}")
         return profile_data
+            profile_data = {
+                "gender": specs_list[0],
+                "height": float(specs_list[1]),
+                "weight": float(specs_list[2]),
+            }
+
+            # Save as josn file
+            with open(PROFILE_FILE, 'w', encoding='utf-8') as f:
+                json.dump(profile_data, f, indent=4)
+            print(f"New user profile generated: {profile_data}")
+            return profile_data
+        except Exception as e:
+            print(f"Error parsing input specs: {e}. Falling back to saved or default profile.")
     
     if os.path.exists(PROFILE_FILE):
         with open(PROFILE_FILE, 'r') as f:
@@ -77,9 +99,21 @@ def get_user_specs(input_specs):
         print(f"User data loaded {profile_data}")
 
         return profile_data
+        try:
+            with open(PROFILE_FILE, 'r', encoding='utf-8') as f:
+                profile_data = json.load(f)
+            
+            # Check if required keys exist
+            if all(key in profile_data for key in ["gender", "height", "weight"]):
+                print(f"User data loaded: {profile_data}")
+                return profile_data
+        except Exception as e:
+            print(f"Error reading profile JSON: {e}. Corrupted file?")
     
     print("No user profile nor input: using Default profile")
     return {"gender": "Unknown", "height": 185.0, "weight": 80.0}
+    print("No valid user profile found: using Default profile")
+    return default_profile
 
 parsed_specs = get_user_specs(args.specs)
 
@@ -185,9 +219,15 @@ while cap.isOpened():
         end_time = time.perf_counter()
         latency_us = (end_time - start_time) * 1000000
         print(f"CPU calculation time: {latency_us:.2f} us")
+        
+        # 운동이 완료되었는지 확인하고 휴식(Rest) 단계로 넘기기
+        if is_done:
+            is_resting = True
+            rest_time = time.time()
+            print(f"{type(curr_exercise).__name__} completed! Taking a break.")
 
         # plot landmarks, reps, accuracy
-        utils.draw_status(image, count, stage, accuracy, curr_exercise)
+        utils.draw_status(image, count, stage, accuracy, type(curr_exercise).__name__)
     
 
     cv2.imshow('Workout Advisor', image)
