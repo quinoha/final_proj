@@ -25,7 +25,7 @@ accuracy starts at 100.0, and is decremented when the user
 
 # Left shoulder, elbow, wrist angle used
 class Curl:
-    def __init__(self, target_reps=15, user_specs=None):
+    def __init__(self, target_reps=6, user_specs=None):
         self.cnt = 0
         self.stage = None
         self.target_reps = target_reps
@@ -74,7 +74,7 @@ class Curl:
 
 # Squat class
 class Squat:
-    def __init__(self, target_reps=15, user_specs=None):
+    def __init__(self, target_reps=4, user_specs=None):
         self.cnt = 0
         self.stage = None
         self.target_reps = target_reps
@@ -85,7 +85,7 @@ class Squat:
         TODO: waist, knee, ankle angle squat logic
         """
 
-        # index 3번(visibility) 참조로 수정
+        # index 3번(visibility) 
         left_hip_vis = landmarks['left_hip'][3]
         right_hip_vis = landmarks['right_hip'][3]
 
@@ -140,7 +140,7 @@ class Squat:
 
 # Plank class
 class Plank:
-    def __init__(self, target_time=60, user_specs=None):
+    def __init__(self, target_time=8, user_specs=None):
         self.start_time = None    
         self.stage = "In-position"
         self.target_time = target_time
@@ -163,7 +163,7 @@ class Plank:
         else:
             side = 'right'
 
-        active_shoulder = landmarks[f'left_shoulder']
+        active_shoulder = landmarks[f'{side}_shoulder']
         active_hip = landmarks[f'{side}_hip']
         active_ankle = landmarks[f'{side}_ankle']
         active_elbow = landmarks[f'{side}_elbow']
@@ -185,7 +185,7 @@ class Plank:
     def calculate_accuracy(self, active_back_angle, active_arm_angle):
         accuracy = 100.0
 
-        back_penalty = abs(0 - active_back_angle) * 0.5
+        back_penalty = abs(180 - active_back_angle) * 0.5
         arm_penalty = abs(90 - active_arm_angle) * 0.3
 
         return max(0, accuracy - back_penalty) 
@@ -194,7 +194,7 @@ class Plank:
 #TODO: Pushup routine
 # Extension from plank
 class Pushup:
-    def __init__(self, target_reps=20, user_specs=None):
+    def __init__(self, target_reps=3, user_specs=None):
         self.cnt = 0
         self.stage = "up"
         self.target_reps = target_reps
@@ -217,16 +217,24 @@ class Pushup:
         active_back_angle = utils.calculate_angle(landmarks[f'{side}_shoulder'],
                                                   landmarks[f'{side}_hip'],
                                                   landmarks[f'{side}_ankle'])
-            
-        accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
+
+        if active_arm_angle > 160:
+            if self.stage == "down":
+                self.cnt += 1
+                print(f"Push-up reps: {self.cnt} / {self.target_reps}")
+            self.stage = "up"
+
+        elif active_arm_angle < 90:
+            self.stage = "down"
+
+        accuracy = self.calculate_accuracy(active_back_angle)
         is_done = (self.cnt >= self.target_reps)
 
         return self.cnt, self.stage, accuracy, is_done
 
-    def calculate_accuracy(self, active_arm_angle, active_back_angle):
+    def calculate_accuracy(self, active_back_angle):
         accuracy = 100.0
 
         back_penalty = abs(0 - active_back_angle) * 0.5
-        arm_penalty = abs(0 - active_arm_angle) * 0.5
 
         return max(0, accuracy - back_penalty - arm_penalty)
