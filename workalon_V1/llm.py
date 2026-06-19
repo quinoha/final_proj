@@ -55,7 +55,8 @@ class WorkoutPlanner:
 
         return response.text.strip().lower()
 
-
+'''
 # test code
 planner = WorkoutPlanner()
 result = planner.get_recommendation()
+'''

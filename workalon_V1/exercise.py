@@ -46,7 +46,7 @@ class Curl:
         if arm_angle < 30 and self.stage == "down":
             self.stage = "up"
             self.cnt += 1
-            print(self.cnt)
+            print(f"reps: {self.cnt}")
 
         curl_accuracy = self.calculate_accuracy(arm_angle, back_angle)
 
@@ -85,8 +85,9 @@ class Squat:
         TODO: waist, knee, ankle angle squat logic
         """
 
-        left_hip_vis = landmarks['left_hip'][2]
-        right_hip_vis = landmarks['right_hip'][2]
+        # index 3번(visibility) 참조로 수정
+        left_hip_vis = landmarks['left_hip'][3]
+        right_hip_vis = landmarks['right_hip'][3]
 
         if left_hip_vis > right_hip_vis:
             side = 'left'
@@ -123,7 +124,7 @@ class Squat:
             self.stage = "down"
 
         is_done = (self.cnt >= self.target_reps)
-        squat_accuracy = self.caculate_accuracy(shoulder_balance, leg_angle)
+        squat_accuracy = self.calculate_accuracy(shoulder_balance, leg_angle)
 
         return self.cnt, self.stage, squat_accuracy, is_done
 
@@ -141,17 +142,20 @@ class Squat:
 class Plank:
     def __init__(self, target_time=60, user_specs=None):
         self.start_time = None    
-        self.stage = False
+        self.stage = "In-position"
         self.target_time = target_time
         self.elapsed_time = 0
-        self.remaining_time = self.target_time - self.elapsed_time
+        
     
     # Everything neutral: body angle used
     def update(self, landmarks): 
         plank_time = time.time()
 
-        left_hip_vis = landmarks['left_hip'][2]
-        right_hip_vis = landmarks['right_hip'][2]
+        if self.start_time is None:
+            self.start_time = plank_time
+
+        left_hip_vis = landmarks['left_hip'][3]
+        right_hip_vis = landmarks['right_hip'][3]
 
         # pick left or right as active side for better tracking
         if left_hip_vis > right_hip_vis:
@@ -169,24 +173,20 @@ class Plank:
         active_back_angle = utils.calculate_angle(active_shoulder, active_hip, active_ankle)
         active_arm_angle = utils.calculate_angle(active_shoulder, active_elbow, active_wrist)
 
-        plank_accuracy = self.calculate_accuracy(active_back_angle)
+        plank_accuracy = self.calculate_accuracy(active_back_angle, active_arm_angle)
 
-
-        # detect currect plank
-        #if active_back_angle > 
-
-        self.elapsed_time += plank_time
+        self.elapsed_time = plank_time - self.start_time
 
         is_done = self.elapsed_time >= self.target_time
         
-
-        return self.elapsed_time, self.stage, plank_accuracy, is_done
+        return int(self.elapsed_time), self.stage, plank_accuracy, is_done
     
 
     def calculate_accuracy(self, active_back_angle, active_arm_angle):
         accuracy = 100.0
 
         back_penalty = abs(0 - active_back_angle) * 0.5
+        arm_penalty = abs(90 - active_arm_angle) * 0.3
 
         return max(0, accuracy - back_penalty) 
 
@@ -202,8 +202,8 @@ class Pushup:
 
     def update(self, landmarks):
         
-        left_visibility = landmarks['left_hip'][2]
-        right_visibility = landmarks['right_hip'][2]
+        left_visibility = landmarks['left_hip'][3]
+        right_visibility = landmarks['right_hip'][3]
 
         if left_visibility > right_visibility:
             side = 'left'
@@ -218,10 +218,6 @@ class Pushup:
                                                   landmarks[f'{side}_hip'],
                                                   landmarks[f'{side}_ankle'])
             
-        accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
-        
-        # Calculate reps
-
         accuracy = self.calculate_accuracy(active_arm_angle, active_back_angle)
         is_done = (self.cnt >= self.target_reps)
 

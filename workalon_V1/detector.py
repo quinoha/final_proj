@@ -62,7 +62,7 @@ class PoseDetector:
 
                 key_name = name.name.lower()
 
-                lm_list[key_name] = [lm.x, lm.y, lm.z]
+                # 가시성(visibility) 데이터 추가
+                lm_list[key_name] = [lm.x, lm.y, lm.z, lm.visibility]
 
         return lm_list
-

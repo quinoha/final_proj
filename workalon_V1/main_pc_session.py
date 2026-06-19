@@ -27,18 +27,14 @@ BPM monitoring via ESP32 and AFib sensor:
 AFib sensor gets heartrate data from wrist, and is sent to Raspberry pi via BLE.
 heartrate is monitore throughout the execute stage, and overall data is assessed afterwards.
 
-============== Personnel Tracking ==============
-
 
 How-to:
-# 첫 실행 (프로필 저장 + AI 루틴 생성)
+# First time using (make profile)
 python main_pc_session.py --routine auto --specs "Gender, Height, weight"
 python main_pc_session.py --routine auto --specs "Male, 180, 80"
 
-# 두 번째 실행부터 (저장된 프로필 기반으로 매번 다른 루틴 생성)
+# from second time, load profile
 python main_pc_session.py --routine auto
-
-
 '''
 
 # Gemini API call
@@ -49,7 +45,6 @@ parser = argparse.ArgumentParser(description="WARKALON-V1: add your workout rout
 parser.add_argument('--routine', type=str, help='routines')
 parser.add_argument('--specs', type=str, help='Male/Female, Height, Weight')
 args = parser.parse_args()
-
 
 """
 function for getting user inputs as json file.
@@ -63,22 +58,11 @@ def get_user_specs(input_specs):
     default_profile = {"gender": "Unknown", "height": 185.0, "weight": 80.0}
 
     if input_specs:
-        specs_list = [spec.strip() for spec in input_specs.split(',')]
-        profile_data = {
-            "gender": specs_list[0],
-            "height": float(specs_list[1]),
-            "weight": float(specs_list[2]),
-        }
         try:
             specs_list = [spec.strip() for spec in input_specs.split(',')]
             if len(specs_list) != 3:
                 raise ValueError("Needs exactly 3 arguments (e.g. 'Male, 180, 80')")
 
-        # Save as josn file
-        with open(PROFILE_FILE, 'w') as f:
-            json.dump(profile_data, f, indent=4)
-        print(f"New user profile generated: {profile_data}")
-        return profile_data
             profile_data = {
                 "gender": specs_list[0],
                 "height": float(specs_list[1]),
@@ -94,11 +78,6 @@ def get_user_specs(input_specs):
             print(f"Error parsing input specs: {e}. Falling back to saved or default profile.")
     
     if os.path.exists(PROFILE_FILE):
-        with open(PROFILE_FILE, 'r') as f:
-            profile_data = json.load(f)
-        print(f"User data loaded {profile_data}")
-
-        return profile_data
         try:
             with open(PROFILE_FILE, 'r', encoding='utf-8') as f:
                 profile_data = json.load(f)
@@ -110,8 +89,11 @@ def get_user_specs(input_specs):
         except Exception as e:
             print(f"Error reading profile JSON: {e}. Corrupted file?")
     
+    '''
     print("No user profile nor input: using Default profile")
     return {"gender": "Unknown", "height": 185.0, "weight": 80.0}
+    '''
+    
     print("No valid user profile found: using Default profile")
     return default_profile
 
@@ -123,13 +105,20 @@ routine_map = {
     "curl": Curl,
     "squat": Squat,
     "plank": Plank,
-    "pushup": Pushup
+    #"pushup": Pushup
 }
 
-#routine_names = args.routine.lower() if args.routine else "curl"
-
 if args.routine:
-    routine_names = [name.strip().lower() for name in args.routine.split(',')]
+    if args.routine.strip().lower() == "auto":
+        print("Requesting AI for workout recommendation...")
+        available_exercises = list(routine_map.keys())
+        # Call Gemini AI to get routine
+        recommended = planner.get_recommendation(parsed_specs, available_exercises)
+        print(f"AI Recommended Routine: {recommended}")
+        
+        routine_names = [name.strip().lower() for name in recommended.split(',')]
+    else:
+        routine_names = [name.strip().lower() for name in args.routine.split(',')]
 else:
     routine_names = ["curl"]
 
@@ -139,7 +128,7 @@ for name in routine_names:
     if name in routine_map:
         session_queue.append(routine_map[name](user_specs=parsed_specs))
     else:
-        print(f"Unknwon routine skipped.")
+        print(f"Unknown routine '{name}' skipped.")
 
 if not session_queue:
     print("No executable routines. Default to curl")
@@ -218,9 +207,9 @@ while cap.isOpened():
 
         end_time = time.perf_counter()
         latency_us = (end_time - start_time) * 1000000
-        print(f"CPU calculation time: {latency_us:.2f} us")
+        #print(f"CPU calculation time: {latency_us:.2f} us")
         
-        # 운동이 완료되었는지 확인하고 휴식(Rest) 단계로 넘기기
+        # Pass to rest time
         if is_done:
             is_resting = True
             rest_time = time.time()

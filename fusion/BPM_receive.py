@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 import asyncio
+import matplotlib
 
 from bleak import BleakClient
 
