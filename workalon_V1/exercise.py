@@ -46,7 +46,7 @@ class Curl:
         if arm_angle < 30 and self.stage == "down":
             self.stage = "up"
             self.cnt += 1
-            print(f"reps: {self.cnt}")
+            print(f"Curl Count: {self.cnt} / {self.target_reps}")
 
         curl_accuracy = self.calculate_accuracy(arm_angle, back_angle)
 
@@ -117,7 +117,7 @@ class Squat:
             if self.stage == "down":
                 self.stage = "up"
                 self.cnt += 1
-                print(f"Squat count: {self.cnt} / {self.target_reps}")
+                print(f"Squat Count: {self.cnt} / {self.target_reps}")
         
         # A better way for counting
         elif leg_angle < 90:
@@ -141,7 +141,8 @@ class Squat:
 # Plank class
 class Plank:
     def __init__(self, target_time=8, user_specs=None):
-        self.start_time = None    
+        self.last_time = None
+ 
         self.stage = "In-position"
         self.target_time = target_time
         self.elapsed_time = 0
@@ -151,8 +152,12 @@ class Plank:
     def update(self, landmarks): 
         plank_time = time.time()
 
-        if self.start_time is None:
-            self.start_time = plank_time
+        if self.last_time is None:
+            self.last_time = plank_time
+
+        # Delta time
+        delta_time = plank_time - self.last_time
+        self.last_time = plank_time # Save current time
 
         left_hip_vis = landmarks['left_hip'][3]
         right_hip_vis = landmarks['right_hip'][3]
@@ -168,15 +173,29 @@ class Plank:
         active_ankle = landmarks[f'{side}_ankle']
         active_elbow = landmarks[f'{side}_elbow']
         active_wrist = landmarks[f'{side}_wrist']
-        print(f"current side: {side}")
+        #print(f"current side: {side}")
 
         active_back_angle = utils.calculate_angle(active_shoulder, active_hip, active_ankle)
         active_arm_angle = utils.calculate_angle(active_shoulder, active_elbow, active_wrist)
 
+        # Check whether body is upside or laying down
+        # smaller than 0.3 means laying position
+        y_diff = abs(active_shoulder[1] - active_ankle[1])
+        is_horizontal = y_diff < 0.3
+
+        # Check for back angles
+        is_straight = active_back_angle > 150
+
+        # begin plank time only when back angle is satisfied
+        if is_horizontal and is_straight:
+            self.stage = "Holding"
+            self.elapsed_time += delta_time
+        else:
+            # Pause if not
+            self.stage = "Ready"
+        
+
         plank_accuracy = self.calculate_accuracy(active_back_angle, active_arm_angle)
-
-        self.elapsed_time = plank_time - self.start_time
-
         is_done = self.elapsed_time >= self.target_time
         
         return int(self.elapsed_time), self.stage, plank_accuracy, is_done
@@ -221,7 +240,7 @@ class Pushup:
         if active_arm_angle > 160:
             if self.stage == "down":
                 self.cnt += 1
-                print(f"Push-up reps: {self.cnt} / {self.target_reps}")
+                print(f"Push-up Count: {self.cnt} / {self.target_reps}")
             self.stage = "up"
 
         elif active_arm_angle < 90:
@@ -237,4 +256,4 @@ class Pushup:
 
         back_penalty = abs(0 - active_back_angle) * 0.5
 
-        return max(0, accuracy - back_penalty - arm_penalty)
+        return max(0, accuracy - back_penalty)

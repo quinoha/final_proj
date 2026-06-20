@@ -213,7 +213,7 @@ while cap.isOpened():
         if is_done:
             is_resting = True
             rest_time = time.time()
-            print(f"{type(curr_exercise).__name__} completed! Taking a break.")
+            print(f"{type(curr_exercise).__name__} completed! Taking a break of {break_duration} seconds.")
 
         # plot landmarks, reps, accuracy
         utils.draw_status(image, count, stage, accuracy, type(curr_exercise).__name__)
